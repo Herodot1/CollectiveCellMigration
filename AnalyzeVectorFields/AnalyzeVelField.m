@@ -1,5 +1,5 @@
 function [AutoCorrAll,SpeedAll,RMSVelAll,AreaAll,AngVelAll,MeanVelX,MeanVelY] = AnalyzeVelField(VelField,im_size,m,POIx,POIy,CenterSpeed)
-
+% Analyzes the velocity field generated via Mat PIV. 
 
 % Set meshgrid:
 [X,Y] = (meshgrid(1:im_size(2)/size(VelField,2):im_size(2),1:im_size(1)/size(VelField,1):im_size(1)));
