@@ -4,22 +4,17 @@ beta = pwd;
 beta = addpath(beta);  % Adds the path where the m-files are stored in
 StartPath=pwd;
 DataPath=uigetdir(StartPath, 'Chose the folder with the images');
-alpha = cd(DataPath);   % legt jpg_path2 als aktuellen folder fest
+alpha = cd(DataPath);   % legt alpha als aktuellen folder fest
 FolderList = dir();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up storage structure and some parameters:
-VelFieldData = struct('Name',[],'pAll',[],'VTempAll',[],'AreaAll',[],...
-    'RMSVelAll',[],'AngVelAll',[],'MSDAll',[],'MSDTempAll',[],...
+VelFieldData = struct('Name',[],'RMSVelAll',[],'MSDAll',[],'MSDTempAll',[],...
     'QAll',[],'QTempAll',[],'ChiAll',[],'ChiTempAll',[],'tau',[],...
-    'Speed',[],'AutoCorrAll',[],'DelaunayNeighborsTimeReversedAll',[],...
-    'DelaunayNeighborsAll',[],'NumNewNeighborsAll',[],...
-    'NewNeighborsPerCellAll',[],'NewNeigborsPerDiffusiveCellAll',[],...
-    'NumNewNeighborsTempAll',[],'MeanVelX',[],'MeanVelY',[],...
-    'rMeanAll',[],'IDStartAll',[],'WSize',[]);
+    'Speed',[],'NumNewNeighborsAll',[],'NumNewNeighborsTempAll',[],'WSize',[]);
 
-VecFieldData = struct('Name',[],'AngleVecFields',[],'AngleOrientation',[],'AngleVelField',[]);
+VecFieldData = struct('Name',[],'AngleOrientation',[]);
 
-CellDivData = struct('Name',[],'DivTimesAll',[],'NumDivsAll',[]);
+CellDivData = struct('Name',[],'DivTimesAll',[],'NumDivsAll',[],'MeanSpeedDiv',[],'MeanSpeedNonDiv',[]);
 
 TrackMat = struct('Name',[],'TrackMat',[],'WSize',[]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -36,8 +31,7 @@ end
 % Save start folder:
 curr_directory = pwd;
 
-for folder_number2 = 1:length(FolderList)
-    folder_number = folder_number2
+for folder_number = 1:length(FolderList)
     % Go to results folder:
     cd(strcat(FolderList(folder_number).name));
     % List files:
@@ -61,20 +55,8 @@ for folder_number2 = 1:length(FolderList)
         load(SaveNameVelField)
         % Get data into struct:
         VelFieldData(folder_number).Name                              = SaveNameVelField(1:end-4);
-        MeanVelX(MeanVelX == 0) = NaN;
-        VelFieldData(folder_number).MeanVelX                          = MeanVelX;
-        MeanVelY(MeanVelY == 0) = NaN;
-        VelFieldData(folder_number).MeanVelY                          = MeanVelY;
-        pAll(pAll == 0) = NaN;
-        VelFieldData(folder_number).pAll                              = pAll;
-        VTempAll(VTempAll == 0) = NaN;
-        VelFieldData(folder_number).VTempAll                          = VTempAll;
-        AreaAll(AreaAll == 0) = NaN;
-        VelFieldData(folder_number).AreaAll                           = AreaAll;
         RMSVelAll(RMSVelAll == 0) = NaN;
         VelFieldData(folder_number).RMSVelAll                         = RMSVelAll;
-        AngVelAll(AngVelAll == 0) = NaN;
-        VelFieldData(folder_number).AngVelAll                         = AngVelAll;
         MSDAll(MSDAll == 0) = NaN;
         VelFieldData(folder_number).MSDAll                            = MSDAll;
         MSDTempAll(MSDTempAll == 0) = NaN;
@@ -90,20 +72,9 @@ for folder_number2 = 1:length(FolderList)
         tau(tau == 0) = NaN;
         VelFieldData(folder_number).tau                               = tau;
         SpeedAll(SpeedAll == 0) = NaN;
-        VelFieldData(folder_number).Speed                             = SpeedAll;
-        AutoCorrAll(AutoCorrAll == 0) = NaN;
-        VelFieldData(folder_number).AutoCorrAll                       = AutoCorrAll;
-        DelaunayNeighborsTimeReversedAll(DelaunayNeighborsTimeReversedAll == 0) = NaN;
-        VelFieldData(folder_number).DelaunayNeighborsTimeReversedAll  = DelaunayNeighborsTimeReversedAll;
-        DelaunayNeighborsAll(DelaunayNeighborsAll == 0) = NaN;
-        VelFieldData(folder_number).DelaunayNeighborsAll              = DelaunayNeighborsAll;
+        VelFieldData(folder_number).Speed                             = SpeedAll;        
         NumNewNeighborsAll(NumNewNeighborsAll == 0) = NaN;
         VelFieldData(folder_number).NumNewNeighborsAll                = NumNewNeighborsAll;
-        NewNeighborsPerCellAll(NewNeighborsPerCellAll == 0) = NaN;
-        VelFieldData(folder_number).NewNeighborsPerCellAll            = NewNeighborsPerCellAll;
-        NewNeigborsPerDiffusiveCellAll(NewNeigborsPerDiffusiveCellAll == 0) = NaN;
-        VelFieldData(folder_number).NewNeigborsPerDiffusiveCellAll    = NewNeigborsPerDiffusiveCellAll;
-        NumNewNeighborsTempAll(NumNewNeighborsTempAll == 0)             = NaN;
         VelFieldData(folder_number).NumNewNeighborsTempAll            = NumNewNeighborsTempAll;
         VelFieldData(folder_number).WSize                             = WSize;
     end
@@ -113,9 +84,7 @@ for folder_number2 = 1:length(FolderList)
         load(SaveNameOrientation)
         % Get data into struct:
         VecFieldData(folder_number).Name              = SaveNameVelField(1:end-4);
-        VecFieldData(folder_number).AngleVecFields    = AngleVecFields;
         VecFieldData(folder_number).AngleOrientation  = AngleOrientation;
-        VecFieldData(folder_number).AngleVelField     = AngleVelField;
     end
     %% Cell division data:
     if (exist(SaveNameDivision) == 2)
@@ -124,6 +93,10 @@ for folder_number2 = 1:length(FolderList)
         CellDivData(folder_number).Name        = SaveNameVelField(1:end-4);
         CellDivData(folder_number).DivTimesAll = DivTimesAll;
         CellDivData(folder_number).NumDivsAll  = NumDivsAll;
+        if (exist('MeanSpeedDivAll') == 1) && (exist('MeanSpeedNonDivAll') == 1)
+            CellDivData(folder_number).MeanSpeedNonDiv = MeanSpeedNonDivAll;
+            CellDivData(folder_number).MeanSpeedDiv = MeanSpeedDivAll;
+        end
     end
     
     %% Tracking matrix data:
