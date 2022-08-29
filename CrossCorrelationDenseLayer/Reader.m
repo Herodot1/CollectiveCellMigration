@@ -1,102 +1,60 @@
-function [stack_new, m,m_max]=Reader(jpg_path2,varargin)
+function [Stack, m,m_max]=Reader(FilePath,varargin)
 % the second argument needs to be a vector [x y] that defines the start and
 % end image for reading.
 
-%     % Get the full path: Initial folder(jpg_path2)  +
-%     % Subfolder(folder_name)
-%     jpg_path2 = strcat(jpg_path2,'\',folder_name);
-%     % Get the extension of the image Files.
-%     extension = dir(jpg_path2);
-%     extension = extension(size(extension,1)).name;
-%     extension = extension(end-3:end);
     if length(varargin) > 2
-        disp('to many input arguments')
+        disp('Too many input arguments.')
         return
     end
      
-    jpg_path2 = strcat(jpg_path2);
-    files = dir(jpg_path2);
-    i=3;
-    while i <= size(files,1)
-    
-         full_file_name = files(i).name;
-         extension = full_file_name(end-3:end);
-         extension_matrix(i-2) = cellstr(extension);
-         i = i + 1;
-         
+    % Get files and extensions in the path:
+    FilePath = strcat(FilePath);
+    Files = dir(FilePath);
+    % Remove directories:
+    Files([Files.isdir]==1) = [];
+    i=1;
+    while i <= size(Files,1)    
+         FullFileName = Files(i).name;
+         Extension = FullFileName(end-3:end);
+         ExtensionMatrix(i) = cellstr(Extension);
+         i = i + 1;         
+    end
+      
+    % Get the most frequent extension of jpg, pbm, pgm, png, ppm, tif and
+    % bmp and use it for later reading:
+    ExtensionNumbers(1) = sum(strcmpi('.jpg', ExtensionMatrix));
+    ExtensionNumbers(2) = sum(strcmpi('.pbm', ExtensionMatrix));
+    ExtensionNumbers(3) = sum(strcmpi('.pgm', ExtensionMatrix));
+    ExtensionNumbers(4) = sum(strcmpi('.png', ExtensionMatrix));
+    ExtensionNumbers(5) = sum(strcmpi('.ppm', ExtensionMatrix));
+    ExtensionNumbers(6) = sum(strcmpi('.tif', ExtensionMatrix));
+    ExtensionNumbers(7) = sum(strcmpi('.bmp', ExtensionMatrix));
+    position = find(ExtensionNumbers == max(ExtensionNumbers));    
+    if position == 1        
+        Extension = '.jpg';        
+    elseif position == 2        
+    	Extension = '.pbm';          
+    elseif position == 3        
+        Extension = '.pgm';        
+    elseif position == 4        
+        Extension = '.png';        
+    elseif position == 5        
+        Extension = '.ppm';        
+    elseif position == 6        
+        Extension = '.tif';        
+    elseif position == 7        
+        Extension = '.bmp';        
     end
     
-    
-%     extension_numbers(1) = numel(strmatch('.jpg', extension_matrix,'exact'));
-%     extension_numbers(2) = numel(strmatch('.pbm', extension_matrix,'exact'));
-%     extension_numbers(3) = numel(strmatch('.pgm', extension_matrix,'exact'));
-%     extension_numbers(4) = numel(strmatch('.png', extension_matrix,'exact'));
-%     extension_numbers(5) = numel(strmatch('.ppm', extension_matrix,'exact'));
-%     extension_numbers(6) = numel(strmatch('.tif', extension_matrix,'exact'));
-%     extension_numbers(7) = numel(strmatch('.bmp', extension_matrix,'exact'));
-    extension_numbers(1) = sum(strcmpi('.jpg', extension_matrix));
-    extension_numbers(2) = sum(strcmpi('.pbm', extension_matrix));
-    extension_numbers(3) = sum(strcmpi('.pgm', extension_matrix));
-    extension_numbers(4) = sum(strcmpi('.png', extension_matrix));
-    extension_numbers(5) = sum(strcmpi('.ppm', extension_matrix));
-    extension_numbers(6) = sum(strcmpi('.tif', extension_matrix));
-    extension_numbers(7) = sum(strcmpi('.bmp', extension_matrix));
-
-    position = find(extension_numbers == max(extension_numbers));
-    
-    if position == 1
-        
-        extension = '.jpg';
-        
-    elseif position == 2
-        
-    	extension = '.pbm';   
-        
-    elseif position == 3
-        
-        extension = '.pgm';
-        
-    elseif position == 4
-        
-        extension = '.png';
-        
-    elseif position == 5
-        
-        extension = '.ppm';
-        
-    elseif position == 6
-        
-        extension = '.tif';
-        
-    elseif position == 7
-        
-        extension = '.bmp';
-        
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Am Ende wieder entfernen!!!
-    % extension = '.png';
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    % Accounts for a "Results" folder and the "thumbs.db" file.
-    if  sum(extension(1:end) == 's.db') == 4 || strcmp(extension,'ults') == 1 
-        
-        extension = dir(jpg_path2);
-        extension = extension(3).name;
-        extension = extension(end-3:end);
-    
-    end
-    
-      % Get the filenames
-    filenames  = dir(fullfile(jpg_path2, sprintf('*%s',extension)));
-    %filenames = dir(fullfile(jpg_path2, '*.png'));
-    filenames = {filenames.name};
-    %filenames = strrep(filenames,'.png','');   %entfernt die Endung .png aus filename und ersetzt sie mit nichts
-    m = numel(filenames);
+    % Get the filenames
+    FileNames  = dir(fullfile(FilePath, sprintf('*%s',Extension)));
+    FileNames = {FileNames.name};
+    m = numel(FileNames);
     m_max = m;
-    bilder=[];
+    Image=[];
     vec = [1:m];
-    
+    % If additional argument is given restrict reading to the image numbers
+    % given
     if nargin == 2 
         vec = varargin{1};
         if length(vec) == 1
@@ -107,44 +65,31 @@ function [stack_new, m,m_max]=Reader(jpg_path2,varargin)
         end
         if vec(2)>m
             vec(2) = m;
-        end
-        
+        end        
          m = max(vec)- min(vec) + 1;
     end
-    % Read all files.
     
-    
-    for k=vec
-        
+    % Read all files.     
+    for k=vec        
         % Filename
-        d = filenames{k};
+        d = FileNames{k};
         % Get the file
-        f = fullfile(jpg_path2 , d);
+        f = fullfile(FilePath , d);
         % Generate a variable name
-        dynamische_variable = genvarname(d(1:end-4)); 
+        DynamischeVariable = genvarname(d(1:end-4)); 
         % Read the file
-        bilder.(dynamische_variable) = imread(f);
-        eval(sprintf('bild%s = imread(f);',dynamische_variable));
-        % Check if image is rgb or grayscale
-        
-        if size(bilder.(dynamische_variable),3) == 3
-            
-            stack_new2=bilder.(dynamische_variable);
+        Image.(DynamischeVariable) = imread(f);
+        eval(sprintf('bild%s = imread(f);',DynamischeVariable));
+        % Check if image is rgb or grayscale. If rgb transform to grayscale        
+        if size(Image.(DynamischeVariable),3) == 3            
+            StackTemp=Image.(DynamischeVariable);
             pos = k - min(vec) + 1;
-            stack_new(:,:,pos)=rgb2gray(stack_new2);
-            
+            Stack(:,:,pos)=rgb2gray(StackTemp);            
         else
             pos = k - min(vec) + 1;
-            stack_new(:,:,pos)=bilder.(dynamische_variable);
-            
-        end
-        
+            Stack(:,:,pos)=Image.(DynamischeVariable);            
+        end        
         clear bilder.(dynamische_variable);
-        clearvars -EXCEPT k jpg_path2 filenames stack_new m vec m_max %stack_new2
-        
-    end 
-    
-    
-    clear jpg_path;
-
+        clearvars -EXCEPT k FilePath FileNames Stack m vec m_max %stack_new2
+    end       
 end
