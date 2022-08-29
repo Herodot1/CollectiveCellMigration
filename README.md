@@ -1,6 +1,14 @@
 # CollectiveCellMigration
 Analysis of collective cell migration, including PIV, cellular orientation analysis, cell division analysis, etc
 
+Version 2 - 29-08-2022
+Changes:
+- Added sample images together with results, plots, etc.
+- Improved speed
+- Added some checks for correct parameter input
+- Improved internal readability
+- Added additional .pdf as documentation
+
 Version 1 - 30-03-2022
 Features:
 - Automatic image reading with subsequent PIV, orientation and cell division analysis for phase contrast images of dense cell layers
