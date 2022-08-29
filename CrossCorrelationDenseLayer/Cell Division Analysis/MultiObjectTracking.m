@@ -1,13 +1,17 @@
-function tracks = MultiObjectTracking(CenterCl,MaxTimeDiff)
-% MatrixProp is a matrix with multiple features organized the same way area
-% and center is organized. This property is used to sort not previously
-% defined features the same way the better defined ones.
+function tracks = MultiObjectTracking(Center,MaxTimeDiff)
+% Matches multiple detections to tracks:
+% Input:
+% Center = center coordinates (output of the "GetCellDivisions" function)
+% MaxTimeDiff = maximal time an object remains invisible before the track
+% is considered to be terminated.
+% Output:
+% tracks = ordered tracks matched to the detections
 
 tracks = initializeTracks(); % Create an empty array of tracks.
 nextId = 1; % ID of the next track
 predictedCentroid  = []; % Assign list of predicted Centroid
-for j = 1:size(CenterCl,3)  
-    centroids       = CenterCl(:,:,j);  
+for j = 1:size(Center,3)  
+    centroids       = Center(:,:,j);  
     pos_in = find(isnan(centroids(:,1)) == 1,1);
     if ~isempty(pos_in)        
         centroids = centroids(1:pos_in-1,:);        
@@ -35,8 +39,6 @@ tracks = struct(...
     'centroid',{}, ...
     'centroidPredicted',{}, ...
     'TrackTerminated', {});
-    %'Boarder', {}, ...
-    %'Mitosis', {}, ...
 end
 
 % Use the Kalman filter to predict the centroid of each track in the 
@@ -45,14 +47,7 @@ function predictNewLocationsOfTracks()
 for i = 1:length(tracks)
         
     % Predict the current location of the track.
-    predictedCentroid = predict(tracks(i).kalmanFilter);    
-    % Shift the bounding box so that its center is at
-    % the predicted location.
-    % predictedCentroid = int32(predictedCentroid) - bbox(3:4) / 2;
-    % tracks(i).bbox = [predictedCentroid, bbox(3:4)];
-    % predictedCentroid = int32(predictedCentroid);
-    % tracks(i).bbox = [predictedCentroid, predictedCentroid];
-    
+    predictedCentroid = predict(tracks(i).kalmanFilter);       
 end
 end
 
@@ -71,7 +66,6 @@ totalVisibleCounts = [tracks(:).totalVisibleCount];
 invisibility = 1-totalVisibleCounts ./ ages;
 % if total invisibility count is larger than 25 images, set invisibility to
 % a very high value so a new track is created:
-%tracks(:).consecutiveInvisibleCount
 invisibility([tracks(:).consecutiveInvisibleCount]>MaxTimeDiff) = 10^10;
 
 for i = 1:nTracks
@@ -80,21 +74,13 @@ for i = 1:nTracks
     LastIdx = find(~isnan(tracks(i).centroid(:,1)),1,'last');
     % calculate cost function as euclidean distance between cell centers.
     % Take into account the time the track was invisible.
-    %cost(i, :) = (1+2*invisibility(i))*hypot(tracks(i).centroid(j-1,1)-centroids(:,1), tracks(i).centroid(j-1,2)-centroids(:,2));
     cost(i, :) = (1+5*invisibility(i))*hypot(tracks(i).centroid(LastIdx,1)-centroids(:,1), tracks(i).centroid(LastIdx,2)-centroids(:,2));
     
 end
-%cost(isnan(cost)) = 0;
-% j
-% cost
 
 % Solve the assignment problem.
 costOfNonAssignment = 150;
 costOfNonAssignment = 50; % eucledean metric
-% original:
-% [assignments, unassignedTracks, unassignedDetections] = ...
-%     assignDetectionsToTracks(cost, costOfNonAssignment);
-% munkres algorithm:
 [assignments, unassignedTracks, unassignedDetections] = ...
     assignmunkres(cost, costOfNonAssignment);
 end
@@ -116,16 +102,7 @@ for i = 1:numAssignedTracks
     % Correct the estimate of the object's location
     % using the new detection.
     tracked_location = correct(tracks(trackIdx).kalmanFilter, centroid);
-%     % redefine the bounding box: 
-%     bbox(:,1) = tracked_location(:,1);
-%     bbox(:,2) = tracked_location(:,2);
-%     bbox(:,3) = tracked_location(:,1);
-%     bbox(:,4) = tracked_location(:,2);
-    center(end+1,1:2) = tracked_location(:,1:2);
-    % Replace predicted bounding box with detected
-    % bounding box.
-    % tracks(trackIdx).bbox = bbox;
-    
+    center(end+1,1:2) = tracked_location(:,1:2);   
     % Update center positions over time:
     tracks(trackIdx).centroid = center;
     % Update other parameters:
@@ -198,7 +175,7 @@ for i = 1:size(centroids, 1)
     % Add NaNs to the beginning to account for images that object was not
     % yet visible:
     centroid = [NaN(j-1,2);centroid];  
-
+    % kalmanFilter = 'NotUsed';
     kalmanFilter = configureKalmanFilter(param.motionModel, ...
     	param.initialLocation, param.initialEstimateError, param.motionNoise , param.measurementNoise);
     % Create a new track.
@@ -211,8 +188,6 @@ for i = 1:size(centroids, 1)
         'centroid', centroid, ...
         'centroidPredicted',centroid, ...
         'TrackTerminated', 0);
-        % 'Boarder', 0, ...
-        % 'Mitosis', 0, ...
     
     % Add it to the array of tracks.
     tracks(end + 1) = newTrack;
