@@ -3,7 +3,7 @@ Analysis of collective cell migration, including PIV, cellular orientation analy
 
 Version 3 - 21-10-2022
 Changes:
-  - Changed the way how cell divisions are detected. It now uses a combination of segmentation via uNet, followed by peakfinding in the "cross correlation space" and subsequent classification. Changes results in both increased accuracy/robustness and faster analysis
+  - Changed the way how cell divisions are detected. It now uses a combination of segmentation via uNet, followed by peakfinding in the "cross correlation space" and subsequent classification. Changes result in both increased accuracy/robustness and faster analysis
 
 Version 2 - 29-08-2022
 Changes:
