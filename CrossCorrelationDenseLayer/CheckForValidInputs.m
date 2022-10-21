@@ -1,6 +1,7 @@
 function CheckForValidInputs(UsePIV,s,p,r,UseCellDivDetect,...
-    CType,NetName,MakeVideo,MedFiltSize,FiltType,BackThresh,WSize,...
-    MaxTimeDiff,UseOrientationAnalysis,MSize,rho,UseBM3D)
+    CType,NetName,NetNameSeg,MinDivArea,BlockSize,MakeVideo,MedFiltSize,...
+    FiltType,BackThresh,WSize,MaxTimeDiff,UseOrientationAnalysis,MSize,...
+    rho,UseBM3D)
 
 % Checks inputs in the parameter function on generell validity:
 % Errors for "UseModulXYZ":
@@ -47,6 +48,10 @@ end
 % Error for chosen ANN and cell type:
 if ~isa(NetName,'char')
     error('Error in ParameterFunctionMain.m. \nInput of ''NetName'' must be a char, not a %s.',class(NetName))
+end
+
+if ~isa(NetNameSeg,'char')
+    error('Error in ParameterFunctionMain.m. \nInput of ''NetNameSeg'' must be a char, not a %s.',class(NetNameSeg))
 end
 
 if ~isa(CType,'char')
@@ -194,6 +199,18 @@ if ~xor((size(r{3,2},1) == 4 && size(r{3,2},2) == 1) , (size(r{3,2},1) == 1 && s
 end
 
 % Cell division parameters:
+if ~(isa(MinDivArea,'double') || isa(MinDivArea,'integer')) 
+    error('Error in ParameterFunctionMain.m. \nInput of ''MinDivArea'' must be a double, not a %s.',class(MinDivArea))
+end
+
+if ~(isa(BlockSize,'double') || isa(BlockSize,'integer')) 
+    error('Error in ParameterFunctionMain.m. \nInput of ''BlockSize'' must be a double, not a %s.',class(BlockSize))
+end
+
+if sum(size(BlockSize) ~= [1,2]) ~= 0 
+    error('Error in ParameterFunctionMain.m. Input of ''BlockSize'' must be a vector of size 1x2.')
+end
+
 if ~(isa(MedFiltSize,'double') || isa(MedFiltSize,'integer')) 
     error('Error in ParameterFunctionMain.m. \nInput of ''MedFiltSize'' must be a double, not a %s.',class(MedFiltSize))
 end
