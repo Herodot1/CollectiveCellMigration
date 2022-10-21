@@ -1,6 +1,6 @@
-function [UsePIV,s,p,r,UseCellDivDetect,CType,NetName,MakeVideo,...
-    MedFiltSize,FiltType,BackThresh,WSize,MaxTimeDiff,...
-    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE] = ParameterFunctionMain()
+function [UsePIV,s,p,r,UseCellDivDetect,CType,NetName,NetNameSeg,MinDivArea, ...
+    BlockSize,MakeVideo,MedFiltSize,FiltType,BackThresh,WSize,MaxTimeDiff,...
+    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE] = ParameterFunctionMainPIVlab()
 % Set all relevant parameters for the analysis of velocity and orientation
 % fields of dense cell layers
 %% Set parameters for PIV:
@@ -64,6 +64,13 @@ CType = 'GBM #4';
 % of cell division events. Nets are stored along the m-files for analysis 
 % in the subfolder '\TrainedANNs'. 
 NetName = 'GoogLeNet';
+% Name of the network used for semantic segmentation of division events:
+NetNameSeg = 'SegmentationUNet';
+% Minimal size of a detected cell division figure (used in post processing
+% after segmentation). Given in pixel:
+MinDivArea = 500;
+% Block size used for training the segmentation network:
+BlockSize = [256,256];
 % Make a video of detected cell divisions and associated tracks? 1 = yes, 0
 % = no
 MakeVideo = 1;
