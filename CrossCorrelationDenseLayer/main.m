@@ -1,11 +1,3 @@
-% to do:
-% 1) add all input parameters for the cell division detection
-% 2) save settings for both cell division detection and cell orientation
-% analysis
-% 3) make an automatic attempt at predicting the size of the velocity field
-% containing matrix
-
-%Use imhistmatch for subsequent images for better results?
 clear all;
 mPath = mfilename('fullpath');
 Idx = max(strfind(mPath,filesep));
@@ -24,12 +16,13 @@ addpath(strcat(mPath,filesep,'Cell Division Analysis'))
 addpath(strcat(mPath,filesep,'Orientation Analysis'))
 
 % Load parameters and check validity:
-[UsePIV,s,p,r,UseCellDivDetect,CType,NetName,MakeVideo,...
-    MedFiltSize,FiltType,BackThresh,WSize,MaxTimeDiff,...
-    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE] = ParameterFunctionMain;
-CheckForValidInputs(UsePIV,s,p,r,UseCellDivDetect,...
-    CType,NetName,MakeVideo,MedFiltSize,FiltType,BackThresh,WSize,...
-    MaxTimeDiff,UseOrientationAnalysis,MSize,rho,UseBM3D)
+[UsePIV,s,p,r,UseCellDivDetect,CType,NetName,NetNameSeg,MinDivArea, ...
+    BlockSize,MakeVideo,MedFiltSize,FiltType,BackThresh,WSize,MaxTimeDiff,...
+    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE] = ParameterFunctionMainPIVlab;
+CheckForValidInputsPIVlab(UsePIV,s,p,r,UseCellDivDetect,...
+    CType,NetName,NetNameSeg,MinDivArea,BlockSize,MakeVideo,MedFiltSize,...
+    FiltType,BackThresh,WSize,MaxTimeDiff,UseOrientationAnalysis,MSize,...
+    rho,UseBM3D)
 
 % Load templates used for cell division detection and the ANN:
 if UseCellDivDetect == 1
@@ -54,6 +47,14 @@ if UseCellDivDetect == 1
     net = load(strcat(NetName,'.mat'));
     VariableNames = fieldnames(net);
     net = net.(VariableNames{1});    
+    
+    % load the trained ANN for segmentation:
+    cd(strcat(mPath,filesep,'Cell Division Analysis',filesep,'Trained Segmentation Networks'))
+    % As the name of the variable is not clear, use field names, as the
+    % model is the only constituent (I hope ...):
+    SegNet = load(strcat(NetNameSeg,'.mat'));
+    VariableNames = fieldnames(SegNet);
+    SegNet = SegNet.(VariableNames{1});
     
     % Check if the input layer has the right size, as determined by the "WSize"
     % parameter:
@@ -185,7 +186,11 @@ parfor FolderNumber = 3:length(FolderList)
         
         % Get cell division events:
         if UseCellDivDetect
-            CenterDivisionsTemp = GetCellDivisions(im1,Template,net,UseCLAHE,MedFiltSize,BackThresh,FiltType,WSize);
+            tmp = Reader(strcat(FolderPath,'\',FolderList(FolderNumber).name),i);
+            if ~isa(tmp,'uint8')
+                tmp = im2uint8(tmp);
+            end
+            CenterDivisionsTemp = GetCellDivisionsSegmentation(tmp,Template,SegNet,net,MinDivArea,BlockSize,UseCLAHE,MedFiltSize,BackThresh,FiltType,WSize);       
             CenterDivisions(1:size(CenterDivisionsTemp,1),:,i) = CenterDivisionsTemp;
         end
         
@@ -197,34 +202,7 @@ parfor FolderNumber = 3:length(FolderList)
             EigVec = EigInfo.w1;
             % Take only every 'MSize' value in all dimensions
             EigVec = EigVec(1:MSize:end,1:MSize:end,:);
-            CellOrientation{i} = EigVec;
-            
-%                     % Make Plot:
-%                     [images]=Reader(strcat(jpg_path2,'\',folderList(FolderNumber).name),[i+1]);
-%                     %images = imhistmatch(double(images),im1,256);
-%                     if ~isa(images,'uint8')
-%                         images = im2uint8(images);
-%                     end
-%                     im2 = images;                    
-%                     [~, im2] = BM3D(1, double(im2), 0.5*std(double(im2(:))));
-%                     
-%                     para.Step  = 35; %%% intensity of orientation
-%                     para.scl   = 10; %%% length of orientation
-%                     rho=15;
-%                     EigInfo = coherence_orientation(double(im2),rho);
-%                     ConvInfo.imconv = ones(size(im2));
-%                     DisplayImage(im2,EigInfo,ConvInfo,para)
-%                     %cd(folder)
-%                     saveas(gcf, sprintf('Orientation Image #10 V1 01 im%d.png',i));
-%                     close all
-%                     cd('..');
-%             
-%                     [x,y] = meshgrid(1:size(im1,2),1:size(im1,1));
-%                     figure;
-%                     imshow(im1,[])
-%                     hold on
-%                     quiver(x(1:MSize:end,1:MSize:end),y(1:MSize:end,1:MSize:end),EigVec(1:1:end,1:1:end,2),EigVec(1:1:end,1:1:end,1))           
-            
+            CellOrientation{i} = EigVec;             
         end        
         % Set new im1 as old im2:
         im1 = im2;
@@ -249,8 +227,8 @@ parfor FolderNumber = 3:length(FolderList)
 
         % go to save folder and save data:
         cd(folderDivision{FolderNumber-2})
-        SaveDivision(CellProps,CType,NetName, MedFiltSize,FiltType,...
-        BackThresh,WSize,MaxTimeDiff)
+        SaveDivision(CellProps,CType,NetName,NetNameSeg,MedFiltSize,FiltType,...
+        BackThresh,WSize,MaxTimeDiff,BlockSize,MinDivArea)
         if MakeVideo           
             MakeDivisionVideo(CellProps,StartPos,FolderPath,FolderList,FolderNumber,m)
         end
