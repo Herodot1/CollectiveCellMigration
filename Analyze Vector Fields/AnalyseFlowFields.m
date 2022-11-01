@@ -29,7 +29,7 @@ FolderListOuter = dir();
 CheckForValidInputs(s_size,im_size,ImPhysSize,dt,CSize,OvThresh,WSize,...
     CenterSpeed,SubPxResolution,Sampling,MaxVisibleTime)
 
-% pixel size of image in µm/px:
+% pixel size of image in Âµm/px:
 PxSize = ImPhysSize/im_size;
 % calculate meshgrid based on the points of interest difference:
 s_size = ceil(s_size(1));
@@ -118,7 +118,13 @@ for FolderNum = 1:length(FolderListOuter)
             % Load velocity field:
             load('VelocityField.mat')
             load('PositionsX.mat')
-            load('PositionsY.mat')
+            load('PositionsY.mat')            
+            % remove drift in velocity field            
+            for i = 1:size(VelField,4)
+                VelField(:,:,1,i) = VelField(:,:,1,i) - VelFieldDrift(1,i);
+                VelField(:,:,2,i) = VelField(:,:,2,i) - VelFieldDrift(2,i);
+            end
+            
             % Number of images analyzed:
             m = size(VelField,4);
             % Get tracking matrix from velocity field:
