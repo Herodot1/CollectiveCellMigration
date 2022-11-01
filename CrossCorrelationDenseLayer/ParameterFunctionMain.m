@@ -1,6 +1,7 @@
 function [UsePIV,s,p,r,UseCellDivDetect,CType,NetName,NetNameSeg,MinDivArea, ...
     BlockSize,MakeVideo,MedFiltSize,FiltType,BackThresh,WSize,MaxTimeDiff,...
-    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE] = ParameterFunctionMainPIVlab()
+    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE,UseDriftCorrect,...
+    WinSizeDrift] = ParameterFunctionMainPIVlab()
 % Set all relevant parameters for the analysis of velocity and orientation
 % fields of dense cell layers
 %% Set parameters for PIV:
@@ -115,3 +116,10 @@ rho=15;
 % Use BM3D filter to denoise input image? 1 == yes, 0 == no.
 UseBM3D = 0;
 
+% Use drift correction for velocity field to adjust stage drift and
+% imprecise position recovery when imaging multiple positions:
+UseDriftCorrect = 1;
+% Parameters for drift correction:
+% Windo size used fo pattern matching. Should correspond roughly to image
+% size.
+WinSizeDrift = 960; 
