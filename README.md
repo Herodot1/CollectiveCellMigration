@@ -1,6 +1,10 @@
 # CollectiveCellMigration
 Analysis of collective cell migration, including PIV, cellular orientation analysis, cell division analysis, etc
 
+Version 4 - 01-11-2022
+Changes:
+  - Added an additional - PIV based - drift correction, correcting for stage drift and imprecise position recovery when imaging multiple positions.
+
 Version 3 - 21-10-2022
 Changes:
   - Changed the way how cell divisions are detected. It now uses a combination of segmentation via uNet, followed by peakfinding in the "cross correlation space" and subsequent classification. Changes result in both increased accuracy/robustness and faster analysis
