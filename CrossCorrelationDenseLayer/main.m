@@ -18,11 +18,12 @@ addpath(strcat(mPath,filesep,'Orientation Analysis'))
 % Load parameters and check validity:
 [UsePIV,s,p,r,UseCellDivDetect,CType,NetName,NetNameSeg,MinDivArea, ...
     BlockSize,MakeVideo,MedFiltSize,FiltType,BackThresh,WSize,MaxTimeDiff,...
-    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE] = ParameterFunctionMainPIVlab;
+    UseOrientationAnalysis,MSize,rho,UseBM3D,UseCLAHE,UseDriftCorrect,...
+    WinSizeDrift] = ParameterFunctionMainPIVlab;
 CheckForValidInputsPIVlab(UsePIV,s,p,r,UseCellDivDetect,...
     CType,NetName,NetNameSeg,MinDivArea,BlockSize,MakeVideo,MedFiltSize,...
     FiltType,BackThresh,WSize,MaxTimeDiff,UseOrientationAnalysis,MSize,...
-    rho,UseBM3D)
+    rho,UseBM3D,UseDriftCorrect,WinSizeDrift)
 
 % Load templates used for cell division detection and the ANN:
 if UseCellDivDetect == 1
@@ -143,6 +144,11 @@ parfor FolderNumber = 3:length(FolderList)
         % Set speed at first image to zero:
         VelField(:,:,1,1) = 0;
         VelField(:,:,2,1) = 0;
+	% Set drift speed:
+        sDrift = s;
+        sDrift{1,2} = WinSizeDrift;
+        VelFieldDrift =NaN(2,m);
+        VelFieldDrift(:,1) = 0;
     end
     % Centers of cell divisions:
     CenterDivisions = NaN(250,2,m);
@@ -177,7 +183,24 @@ parfor FolderNumber = 3:length(FolderList)
             post_proc_wrapper(u,v,typevector,r,true);  
             % Set velocity field:
             VelField(:,:,1,i+1) = u_filt;
-            VelField(:,:,2,i+1) = v_filt;           
+            VelField(:,:,2,i+1) = v_filt;      
+	    
+	    % Calculate drift:
+            if UseDriftCorrect
+                % Drift estimate
+                [x, y, u, v, typevector,correlation_map] = ...
+                    piv_analysis(im1,im2,p,sDrift,1,false);
+                % Post processing:
+                [u_filt_drift, v_filt_drift,typevector_filt]= ...
+                    post_proc_wrapper(u,v,typevector,r,true);
+                % Set drift speed:
+                u_filt_drift = nanmean(u_filt_drift(:));
+                v_filt_drift = nanmean(v_filt_drift(:));
+                VelFieldDrift(1,i+1) = u_filt_drift;
+                VelFieldDrift(2,i+1) = v_filt_drift;
+            else
+                VelFieldDrift(:,i+1) = 0;
+            end
 
             % display current average speed in px/ whatever time between
             % sucessive images is ...
@@ -211,7 +234,7 @@ parfor FolderNumber = 3:length(FolderList)
     % save velocity field in results folder:
     if UsePIV
         cd(folderVelField{FolderNumber-2})
-        SavePIV(VelField,x,y,p,s,r)
+        SavePIVlab(VelField,VelFieldDrift,x,y,p,s,r,WinSizeDrift)
         cd(CurrDirectory);
     end
     
