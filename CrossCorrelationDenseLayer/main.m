@@ -144,9 +144,13 @@ parfor FolderNumber = 3:length(FolderList)
         % Set speed at first image to zero:
         VelField(:,:,1,1) = 0;
         VelField(:,:,2,1) = 0;
-	% Set drift speed:
+	% Set drift correction parameters:
         sDrift = s;
+        % Set window size to chosen one:
         sDrift{1,2} = WinSizeDrift;
+        % set number of passes to one:
+        sDrift{6,2} = 1;
+        % Allocate variable for drift speed:
         VelFieldDrift =NaN(2,m);
         VelFieldDrift(:,1) = 0;
     end
