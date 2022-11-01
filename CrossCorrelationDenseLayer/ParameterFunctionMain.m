@@ -120,6 +120,6 @@ UseBM3D = 0;
 % imprecise position recovery when imaging multiple positions:
 UseDriftCorrect = 1;
 % Parameters for drift correction:
-% Windo size used fo pattern matching. Should correspond roughly to image
+% Window size used fo pattern matching. Should correspond roughly to image
 % size.
 WinSizeDrift = 960; 
