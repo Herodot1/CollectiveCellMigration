@@ -32,9 +32,10 @@ function [CenterDivisions] = GetCellDivisionsSegmentation(Im,Template,SegNet,net
 % clahe currently destroys classification of the classification ANN
 if UseCLAHE
     FiltSize = net.Layers(1,1).InputSize(1);
-    if max(Im(:))>1
-        Im = Im./max(Im(:));
-    end
+    % This part causes the segmentation to fail, as it was trained on uint8 images of range [0,255]
+    % if max(Im(:))>1
+    %     Im = Im./max(Im(:));
+    % end
     Im = adapthisteq(Im,'NumTiles',[round(size(Im,1)/FiltSize),round(size(Im,2)/FiltSize)],'ClipLimit', 0.003, 'NBins', 256, 'Range', 'full', 'Distribution', 'exponential'); 
 end
 
