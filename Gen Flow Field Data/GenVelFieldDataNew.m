@@ -9,6 +9,7 @@ FolderList = dir();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up storage structure and some parameters:
 VelFieldData = struct('Name',[],'RMSVelAll',[],'MSDAll',[],'MSDTempAll',[],...
+    'MSDCagedAll',[],'MSDCagedTempAll',[],...
     'QAll',[],'QTempAll',[],'ChiAll',[],'ChiTempAll',[],'tau',[],...
     'Speed',[],'NumNewNeighborsAll',[],'NumNewNeighborsTempAll',[],'WSize',[]);
 
@@ -61,6 +62,10 @@ for folder_number = 1:length(FolderList)
         VelFieldData(folder_number).MSDAll                            = MSDAll;
         MSDTempAll(MSDTempAll == 0) = NaN;
         VelFieldData(folder_number).MSDTempAll                        = MSDTempAll;
+        MSDCagedVarAll(MSDCagedVarAll == 0) = NaN;
+        VelFieldData(folder_number).MSDCagedAll                            = MSDCagedVarAll;
+        MSDCagedTempVar(MSDCagedTempVar == 0) = NaN;
+        VelFieldData(folder_number).MSDCagedTempAll                        = MSDCagedTempVar;
         QAll(QAll == 0) = NaN;
         VelFieldData(folder_number).QAll                              = QAll;
         QTempAll(QTempAll == 0) = NaN;
