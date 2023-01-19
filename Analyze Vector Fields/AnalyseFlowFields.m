@@ -87,6 +87,8 @@ for FolderNum = 1:length(FolderListOuter)
     RMSVelAll   = NaN(1700,length(FolderList)-2);   
     MSDAll      = NaN(1700,length(FolderList)-2);
     MSDTempAll  = NaN(WSize,1700,length(FolderList)-2);
+    MSDCagedVarAll  = NaN(1700,10,length(FolderList)-2);
+    MSDCagedTempVar = NaN(WSize,1700,10,length(FolderList)-2);
     QAll        = NaN(1700,length(FolderList)-2);
     QTempAll    = NaN(WSize,1700,length(FolderList)-2);
     ChiAll      = NaN(1700,length(FolderList)-2);
@@ -135,6 +137,9 @@ for FolderNum = 1:length(FolderListOuter)
             %[MSDTemp, QTemp, ChiTemp] = MSDChiOrderTimeWindow(TrackMat,WSize,dt,CSize,OvThresh);
             [MSDTemp, QTemp, ChiTemp,NumNewNeighborsTemp,TrackMatTemp] = ...
                 MSDChiOrderTimeWindow(VelField,WSize,dt,CSize,OvThresh,im_size,POIx,POIy,SubPxResolution,Sampling,CenterSpeed);
+            % Get caged MSD:
+            [CagedMSD] = MSDCaged(TrackMat,dt);
+            [CagedMSDTemp] = MSDCagedTemp(VelField,WSize,dt,im_size,POIx,POIy,SubPxResolution,Sampling,CenterSpeed);
             % Get nearest neighbor relations:
             [NumNewNeighbors] = NearestNeighbors(TrackMat);
             % Calculate speeds:
@@ -142,6 +147,8 @@ for FolderNum = 1:length(FolderListOuter)
             
             % Plug parameters into one global construct:
             MSDAll(1:size(MSD,1),folder_number-2)                         = nanmean(MSD,2);
+            MSDCagedVarAll(1:size(MSD,1),:,folder_number-2)               = CagedMSD;
+            MSDCagedTempVar(:,1:size(CagedMSDTemp,2),:,folder_number-2)   = CagedMSDTemp;
             QAll(1:size(Q,2),folder_number-2)                             = Q;
             ChiAll(1:size(Chi,2),folder_number-2)                         = Chi;
             NumNewNeighborsAll(folder_number-2)                           = NumNewNeighbors;            
@@ -257,7 +264,7 @@ for FolderNum = 1:length(FolderListOuter)
     if (exist(folderVelField) == 7)
         save(SaveNameVelField, 'MSDAll','MSDTempAll','QAll','QTempAll','ChiAll',...
             'ChiTempAll','tau', 'SpeedAll', 'RMSVelAll','NumNewNeighborsAll','NumNewNeighborsTempAll',...
-            'WSize','dt','im_size','CSize','OvThresh')
+            'WSize','dt','im_size','CSize','OvThresh', 'MSDCagedVarAll', 'MSDCagedTempVar')
         VelFieldSize = size(VelField);
         VelFieldSize = VelFieldSize(1:2);
         save('Settings FlowFieldAnalysis.mat','s_size','POIx','POIy','im_size','dt','CSize','OvThresh','WSize','SubPxResolution','Sampling','VelFieldSize','PxSize','CenterSpeed')
