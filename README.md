@@ -4,6 +4,7 @@ Analysis of collective cell migration, including PIV, cellular orientation analy
 Version 5 - 19-01-2023
 Changes:
   - Added the caged mean squared displacement as an additional evaluation parameter (except for plotting)
+  - Added drift correction to the calculation for speed around divisions
 
 Version 4 - 01-11-2022
 Changes:
