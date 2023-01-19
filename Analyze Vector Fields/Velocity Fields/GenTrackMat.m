@@ -64,15 +64,15 @@ for i=1:m-1
     PosX = PosX(:);
     
     % Set spots that moved out of the image to x=y=1:
-    PosX(PosY<1) = 1;
-    PosY(PosY<1) = 1;
-    PosY(PosX<1) = 1;
-    PosX(PosX<1) = 1;
+    PosX(PosY<=1) = 1;
+    PosY(PosY<=1) = 1;
+    PosY(PosX<=1) = 1;
+    PosX(PosX<=1) = 1;
     
-    PosX(PosY>im_size(1)) = 1;
-    PosY(PosY>im_size(1)) = 1;
-    PosY(PosX>im_size(2)) = 1;
-    PosX(PosX>im_size(2)) = 1;
+    PosX(PosY>=im_size(1)) = 1;
+    PosY(PosY>=im_size(1)) = 1;
+    PosY(PosX>=im_size(2)) = 1;
+    PosX(PosX>=im_size(2)) = 1;
      
     % Adjust rounding errors from the interp step:
     PosX(SubPxResolution*PosY>size(Xq,1)) = 1;
