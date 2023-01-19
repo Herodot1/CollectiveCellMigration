@@ -35,8 +35,10 @@ for k = 1+(WSize-1)/2:Sampling:size(VelField,4)-1-((WSize-1)/2)
             % Get points were objects move out of image (<=0) or detection has
             % been abandoned (=NaN)
             ende = find(isnan(Trajectory) == 1,1);
-            ende2 = find(Trajectory(:,1) <= 0,1);
-            ende3 = find(Trajectory(:,2) <= 0,1);
+            %ende2 = find(Trajectory(:,1) <= 0,1);
+            %ende3 = find(Trajectory(:,2) <= 0,1);
+            ende2 = find(diff(Trajectory(:,1)) == 0,1);
+            ende3 = find(diff(Trajectory(:,2)) == 0,1);
             ende = min([ende;ende2;ende3;WSize]);
             % Calculate relative distance for Order Parameter and MSD:
             pos = size(TrackMat,2)*(i-1) + j;                     
