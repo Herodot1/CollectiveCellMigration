@@ -1,7 +1,7 @@
-function [MeanSpeedDiv,MeanSpeedNonDiv] = VelFieldAroundDivisions(CellProps,VelField,x,y,StartPos,EndPos,Idx)
+function [MeanSpeedDiv,MeanSpeedNonDiv] = VelFieldAroundDivisions(CellProps,VelField,VelFieldDrift,CenterSpeed,x,y,StartPos,EndPos,Idx)
 % Calculate local speed around a determine division center:
 
-% Distance in pixels of the velocity field from the center of the division 
+% Distance in pixels of the velocity field from the center of the division
 % event that is taken to calculate the speed around the division.
 Neighborhood = 1;
 % Offset:
@@ -38,16 +38,16 @@ MeanSpeedDiv = NaN(size(VelField,4),1);
 for i = 2:size(VelField,4) % start at i = 2 becaus velocities are set to 0 at first image (no difference can be taken).
     % Get absolute speed values:
     % Correct velocity field for drifts (because motion is supposed to have zero mean):
-    VelX = VelField(:,:,1,i);
+    VelX = VelField(:,:,1,i) - VelFieldDrift(1,i);
     VelX = imgaussfilt(VelX,2.71);
-    VelY = VelField(:,:,2,i);
+    VelY = VelField(:,:,2,i) - VelFieldDrift(2,i);
     VelY = imgaussfilt(VelY,2.71);
-    %if CenterSpeed == 1
-    VelX = VelX - nanmean(VelX(:));
-    %end
-    %if CenterSpeed == 1
-    VelY = VelY - nanmean(VelY(:));
-    %end
+    if CenterSpeed == 1
+        VelX = VelX - nanmean(VelX(:));
+    end
+    if CenterSpeed == 1
+        VelY = VelY - nanmean(VelY(:));
+    end
     Speed = sqrt(VelX.^2+VelY.^2);
     
     % Get speed values for those pixels that are closest to the
@@ -84,7 +84,7 @@ for i = 2:size(VelField,4) % start at i = 2 becaus velocities are set to 0 at fi
             Coords(j,1) = MinIdxX;
             Coords(j,2) = MinIdxY;
             % Get expanded coordinates around the specific
-            % event:            
+            % event:
             CoordsPlus(j,:) = Coords(j,:) + Neighborhood;
             CoordsMinus(j,:) = Coords(j,:) - Neighborhood;
             % Check if anything is out of bounds, if so set it
@@ -104,7 +104,7 @@ for i = 2:size(VelField,4) % start at i = 2 becaus velocities are set to 0 at fi
             % Get mean velocity around divisions:
             tmp = Speed(CoordsMinus(j,2):CoordsPlus(j,2),CoordsMinus(j,1):CoordsPlus(j,1));
             MeanSpeedDivTmp(j) = nanmean(tmp(:));
-        end        
+        end
         MeanSpeedDiv(i) = nanmean(MeanSpeedDivTmp);
         
         % Get mean speed of the remaining velocity field
