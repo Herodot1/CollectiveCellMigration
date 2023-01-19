@@ -248,7 +248,7 @@ for FolderNum = 1:length(FolderListOuter)
         % the image for each single image:
         if (exist(folderVelField) == 7) && (exist(folderDivisions,'file') == 7)
             cd(strcat(FolderList(FolderNum2).name,filesep,'Results'));            
-            [MeanSpeedDiv,MeanSpeedNonDiv] = VelFieldAroundDivisions(CellProps,VelField,x,y,StartPos,EndPos,Idx);           
+            [MeanSpeedDiv,MeanSpeedNonDiv] = VelFieldAroundDivisions(CellProps,VelField,VelFieldDrift,CenterSpeed,x,y,StartPos,EndPos,Idx);           
             MeanSpeedNonDivAll(1:size(MeanSpeedNonDiv,1),folder_number-2) = MeanSpeedNonDiv;
             MeanSpeedDivAll(1:size(MeanSpeedNonDiv,1),folder_number-2) = MeanSpeedDiv;
             %figure; plot(movmean(MeanSpeedDiv./MeanSpeedNonDiv,11,'omitnan'))
