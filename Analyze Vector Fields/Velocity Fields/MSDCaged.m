@@ -49,10 +49,10 @@ for NumNeighborsKNN = [1:10].^2%[1,9,25,49,81,121]
         % Get points were objects move out of image (change ==0) or detection has
         % been abandoned (=NaN)
         ende = find(isnan(Trajectory) == 1,1);
-        ende2 = find(Trajectory(:,1) <= 0,1);
-        ende3 = find(Trajectory(:,2) <= 0,1);
-        ende4 = find(diff(Trajectory(:,1)) == 0,1);
-        ende5 = find(diff(Trajectory(:,2)) == 0,1);
+        ende2 = find(diff(TrackMat(rowPOI(j),colPOI(j),1,:)) == 0,1);
+        ende3 = find(diff(TrackMat(rowPOI(j),colPOI(j),2,:)) == 0,1);
+        ende4 = find(Trajectory(:,1) <= 0,1);
+        ende5 = find(Trajectory(:,2) <= 0,1);
         ende = min([ende;ende2;ende3;ende4;ende5;size(TrackMat,4)+1]);
         % Get MSD:
         [temp,tau] = Kehl(Trajectory(1:ende-1,:));
