@@ -24,6 +24,7 @@ count = 0;
 for i = groups
     count = count + 1;
     LegendNames{count} = VelFieldData(i).Name;
+    % Make sure the time frame is set right:
     VelFieldData(i).tau = dt*[0:t_max./dt]';
 end
 
