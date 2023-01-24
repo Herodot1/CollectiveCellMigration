@@ -39,7 +39,7 @@ for k = 1+(WSize-1)/2:Sampling:size(VelField,4)-1-((WSize-1)/2)
             ende3 = find(Trajectory(:,2) <= 0,1);
             ende4 = find(diff(Trajectory(:,1)) == 0,1);
             ende5 = find(diff(Trajectory(:,2)) == 0,1);
-            ende = min([ende;ende2;ende3;ende4;ende5;size(TrackMat,4)+1]);
+            ende = min([ende;ende2;ende3;ende4;ende5;WSize]);
             % Calculate relative distance for Order Parameter and MSD:
             pos = size(TrackMat,2)*(i-1) + j;                     
             if ende > 2
