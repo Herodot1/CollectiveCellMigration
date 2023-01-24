@@ -10,11 +10,11 @@ addpath(strcat(mPath,filesep,'HelperFunctions'))
 [dt,t_max,Sampling,ImSize,ImPhysSize,VelFieldSize,text_font,groups,...
     savename,color_map] = ParameterFunction;
 % Calculate some derived quantities
-% pixel size of image in µm/px:
+% pixel size of image in Âµm/px:
 PxSize = ImPhysSize/ImSize;
 % Area of image in mm^2:
 ImPhysArea = ImPhysSize(1)*ImPhysSize(2)./10^6;
-% Pixelsize of velocity field in µm/px:
+% Pixelsize of velocity field in Âµm/px:
 VelFieldPxSize = mean((ImSize./VelFieldSize))*PxSize;
 % Windowsize:
 WSize = VelFieldData(1).WSize;
@@ -24,6 +24,7 @@ count = 0;
 for i = groups
     count = count + 1;
     LegendNames{count} = VelFieldData(i).Name;
+    VelFieldData(i).tau = dt*[0:t_max./dt]';
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,7 +80,7 @@ for i = groups(1:end)
     shadedErrorBar(DivTimes,MeanDivs(:,i),SEM,'lineProps',{'.','MarkerSize',0.5,'LineWidth',0.2, 'Color',color_map(count,:)},'patchSaturation',0.2)
 end
 xlabel('Time in min','FontSize',text_font)
-ylabel('Number of Divisions per mm²','FontSize',text_font)
+ylabel('Number of Divisions per mmÂ²','FontSize',text_font)
 xlim([0 t_max]);
 set(gca, 'Fontsize',text_font)
 title('Number of Cell Divisions','FontSize',text_font+6);
@@ -127,7 +128,7 @@ end
 h=figure('units','normalized','outerposition',[0 0 1 1]);
 set(h,'DefaultTextFontSize',24)
 hold all
-%h = boxplot(flip(Young,2),{'10µM Blebbistatin', '40µM Y-27632','U138','5µM Blebbistatin','20µM Y-27632','LN229'},'BoxStyle','outline','Width',0.5,'LabelOrientation','inline','LabelVerbosity','majorminor','Orientation','horizontal');
+%h = boxplot(flip(Young,2),{'10ÂµM Blebbistatin', '40ÂµM Y-27632','U138','5ÂµM Blebbistatin','20ÂµM Y-27632','LN229'},'BoxStyle','outline','Width',0.5,'LabelOrientation','inline','LabelVerbosity','majorminor','Orientation','horizontal');
 h = boxplot(PlotVar',LegendNames,'BoxStyle','outline','Width',0.5,'LabelOrientation','inline','LabelVerbosity','majorminor','Orientation','horizontal');
 set(h,{'linewidth'},{2})
 xlabel('Speed Division/Speed Layer','FontSize',24)
@@ -182,7 +183,7 @@ for i = groups(1:end)
     errorbar(VelFieldData(i).tau,PxSize.^2*nanmean(VelFieldData(i).MSDAll(1:length(VelFieldData(i).tau),:),2),SEM,'.','MarkerSize',0.5,'LineWidth',0.2, 'Color',color_map(count,:))
 end
 xlabel('\Deltat in min','FontSize',text_font)
-ylabel('MSD in µm²','FontSize',text_font)
+ylabel('MSD in ÂµmÂ²','FontSize',text_font)
 xlim([0 t_max]);
 set(gca, 'Fontsize',text_font)
 title('MSD','FontSize',text_font+6);
@@ -241,7 +242,7 @@ saveas(gcf, sprintf('Chi %s.png',savename));
 savefig(sprintf('Chi %s.fig',savename))
 close all
 
-% Speed in µm/h
+% Speed in Âµm/h
 figure('units','normalized','outerposition',[0 0 1 1]);
 plot(VelFieldData(groups(1)).tau,PxSize/(dt/60)*nanmean(VelFieldData(groups(1)).Speed(1:length(VelFieldData(groups(1)).tau),:),2),'o','MarkerSize',5,'LineWidth',2,'Color',color_map(1,:))
 hold all
@@ -258,7 +259,7 @@ for i = groups(1:end)
     shadedErrorBar(VelFieldData(i).tau,PxSize/(dt/60)*nanmean(VelFieldData(i).Speed(1:length(VelFieldData(i).tau),:),2),SEM,'lineProps',{'.','MarkerSize',0.5,'LineWidth',0.2, 'Color',color_map(count,:)},'patchSaturation',0.2)
 end
 xlabel('Time in min','FontSize',text_font)
-ylabel('Speed in µm/h','FontSize',text_font)
+ylabel('Speed in Âµm/h','FontSize',text_font)
 xlim([0 t_max])
 set(gca, 'Fontsize',text_font)
 title('Speed','FontSize',text_font+6);
@@ -266,7 +267,7 @@ saveas(gcf, sprintf('Speed %s.png',savename));
 savefig(sprintf('Speed %s.fig',savename))
 close all
 
-% Root mean squared speed in µm/h
+% Root mean squared speed in Âµm/h
 offset = zeros(size(groups));
 tempOffset = zeros(size(groups));
 figure('units','normalized','outerposition',[0 0 1 1]);
@@ -286,7 +287,7 @@ for i = groups(1:end)
 
 end
 xlabel('Time in min','FontSize',text_font)
-ylabel('Speed in µm/h','FontSize',text_font)
+ylabel('Speed in Âµm/h','FontSize',text_font)
 xlim([0 t_max])
 set(gca, 'Fontsize',text_font)
 title('Speed','FontSize',text_font+6);
