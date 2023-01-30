@@ -1,15 +1,17 @@
-function [pMeanAll,pStdAll] = MSDScalingCoeff(VelFieldData)
+function [pMeanAll,pStdAll] = MSDScalingCoeff(VelFieldData,dt)
 
 Offset = 2;
 pMeanAll = NaN(1700,length(VelFieldData));
 pStdAll  = NaN(1700,length(VelFieldData));
+tau = dt*[1:size(VelFieldData(1).MSDAll,1)];
 for i = 1:length(VelFieldData)
     pGroup = NaN(size(VelFieldData(i).tau,1) ,size(VelFieldData(i).MSDAll,2));
     for j = 1:size(VelFieldData(i).MSDAll,2)
         p = [];
         for k = Offset:size(VelFieldData(i).tau,1) 
             if length(VelFieldData(i).MSDAll(1:k,j)) - sum(isnan(VelFieldData(i).MSDAll(1:k,j))) > Offset
-                pTemp = polyfit(log10(VelFieldData(i).tau(1:k)),log10(VelFieldData(i).MSDAll(1:k,j)),1);     
+                %pTemp = polyfit(log10(VelFieldData(i).tau(1:k)),log10(VelFieldData(i).MSDAll(1:k,j)),1);     
+                pTemp = polyfit(log10(tau(1:k)),log10(VelFieldData(i).MSDAll(1:k,j)),1);  
                 p(k) = pTemp(1);
             end
         end
