@@ -36,7 +36,7 @@ end
 
 % Create scaling coefficient as function of used lag-time for different
 % time windows only:
-[pMeanAllTemp,pStdAllTemp] = MSDScalingCoeffTemp(VelFieldData,Sampling);
+[pMeanAllTemp,pStdAllTemp] = MSDScalingCoeffTemp(VelFieldData,Sampling,dt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make actual plots
