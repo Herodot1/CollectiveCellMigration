@@ -1,8 +1,9 @@
-function [pMeanAllTemp,pStdAllTemp] = MSDScalingCoeffTemp(VelFieldData,Sampling)
+function [pMeanAllTemp,pStdAllTemp] = MSDScalingCoeffTemp(VelFieldData,Sampling,dt)
 
 % Calculate scaling coefficient of the MSD for different time windows:
 
 Times = [1:Sampling:size(VelFieldData(1).tau,1)];
+tau = dt*[1:size(VelFieldData(1).MSDTempAll,1)];
 
 Offset = 2;
 pMeanAllTemp = NaN(size(VelFieldData(1).MSDTempAll,1),length(VelFieldData),length(Times));
@@ -15,7 +16,8 @@ for m = 1:length(Times)
             p = [];
             for k = Offset:size(VelFieldData(i).MSDTempAll,1)
                 if length(VelFieldData(i).MSDTempAll(1:k,Times(m),j)) - sum(isnan(VelFieldData(i).MSDTempAll(1:k,Times(m),j))) > Offset
-                    pTemp = polyfit(log10(VelFieldData(i).tau(1:k)),log10(VelFieldData(i).MSDTempAll(1:k,Times(m),j)),1);
+                    %pTemp = polyfit(log10(VelFieldData(i).tau(1:k)),log10(VelFieldData(i).MSDTempAll(1:k,Times(m),j)),1);
+                    pTemp = polyfit(log10(tau(1:k)),log10(VelFieldData(i).MSDTempAll(1:k,Times(m),j)),1);
                     p(k) = pTemp(1);
                 end
             end
