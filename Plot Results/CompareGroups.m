@@ -32,7 +32,7 @@ end
 %% Time evolution of some critical parameters:
 % Create scaling coefficient as function of used lag-time for the whole
 % time window:
-[pMeanAll,pStdAll] = MSDScalingCoeff(VelFieldData);
+[pMeanAll,pStdAll] = MSDScalingCoeff(VelFieldData,dt);
 
 % Create scaling coefficient as function of used lag-time for different
 % time windows only:
