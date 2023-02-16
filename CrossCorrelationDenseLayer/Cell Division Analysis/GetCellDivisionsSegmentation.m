@@ -22,20 +22,11 @@ function [CenterDivisions] = GetCellDivisionsSegmentation(Im,Template,SegNet,net
 % CenterDivisions = x/y coordinates of detected cell division events
 %%
 
-% Block size used for training:
-%BlockSize = [256,256];
-% Mininmal object size:
-%MinArea = 500;
-
 % Use CLAHE:
 % Use filter size of the same dimension as the images fed to the ANN:
 % clahe currently destroys classification of the classification ANN
 if UseCLAHE
     FiltSize = net.Layers(1,1).InputSize(1);
-    % This part causes the segmentation to fail, as it was trained on uint8 images of range [0,255]
-    % if max(Im(:))>1
-    %     Im = Im./max(Im(:));
-    % end
     Im = adapthisteq(Im,'NumTiles',[round(size(Im,1)/FiltSize),round(size(Im,2)/FiltSize)],'ClipLimit', 0.003, 'NBins', 256, 'Range', 'full', 'Distribution', 'exponential'); 
 end
 
@@ -69,14 +60,14 @@ if ~isempty(stats)
         tmp = Im(yMin:yMax,xMin:xMax);
         CCorr = ones(size(tmp));
         %figure; imshow(tmp)
-        for k = 1:min([size(Template,1),3])
+        for k = 1:min([size(Template,1),5])
             tmpCC = xcorr2e(Template{k},double(tmp),'same');
             tmpCC = medfilt2(tmpCC,[5,5]);
             tmpCC = flip(tmpCC,1);
             tmpCC = flip(tmpCC,2);
             %tmpCC = (tmpCC-NormFactor(k,2)-min(tmpCC)) ./ (NormFactor(k,1)-NormFactor(k,2));
             % normalization factors:
-            tmpCC = (tmpCC-min(tmpCC(:))) ./ (max(tmpCC(:))-min(tmpCC(:)));
+            %tmpCC = (tmpCC-min(tmpCC(:))) ./ (max(tmpCC(:))-min(tmpCC(:)));
             CCorr = CCorr .* tmpCC;
         end
         %figure; imshow(CCorr,[])
@@ -87,10 +78,11 @@ if ~isempty(stats)
         % get cross correlation map and find all potential peaks to feed to
         % the neuronal network. Eliminate candidates with too low
         CCorr = gather(CCorr);
-        CCorr = CCorr./max(CCorr(:));
         %figure; imshow(CCorr,[])
-        % Get peak centers:
-        [Cent]=FastPeakFind(CCorr, BackThresh*2^16, FiltType ,5, 1);
+        % Get peak centers. 2^16 ./ max(CCorr(:)) is used as values of CCorr 
+        % are cast to CCorr*2^16./max(CCorr(:)) -> this way reasonable
+        % thresholding is assured.
+        [Cent]=FastPeakFind(CCorr, BackThresh*2^16./ max(CCorr(:)), FiltType ,5, 1);
         % x and y coordinates:
         x = Cent(1:2:end);
         y = Cent(2:2:end);
