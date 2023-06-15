@@ -13,6 +13,7 @@
 % yCellOrientation: y coordinates of the orientation vector field <- output of meshgrid
 % WinSize: moving average used for calculation of the mean of both vector
 % fields in temporal dimension
+% Binary: Binary images seperating fore and background.
 
 % Output:
 % Angle: Relative angle (0-90 degree) of the cellular orientation relative
@@ -20,12 +21,8 @@
 
 
 function [Angle] = RelativeVectorFieldOrientation(CellOrientationField,VelField,...
-    xCellOrientation,yCellOrientation,xVelField,yVelField,WinSize)
+    xCellOrientation,yCellOrientation,xVelField,yVelField,WinSize,Binary)
 
-
-% Take means:
-VelField = movmean(VelField, WinSize,4);
-CellOrientationField = movmean(CellOrientationField, WinSize,4);
 % CorseGraining:
 CG = 1;
 
@@ -39,14 +36,33 @@ for i = 1:size(VelField,4)
     CellOrientationInterp(:,:,1) = interp2(xCellOrientation,yCellOrientation,CellOrientationField(:,:,2,i),xVelField(1:CG:end,1:CG:end),yVelField(1:CG:end,1:CG:end));
     % y values -> denote the change in x and y coordinates ... dont ask me
     % why the original algorithm switched this up ...
-    CellOrientationInterp(:,:,2) = interp2(xCellOrientation,yCellOrientation,CellOrientationField(:,:,1,i),xVelField(1:CG:end,1:CG:end),yVelField(1:CG:end,1:CG:end));
+    CellOrientationInterp(:,:,2) = interp2(xCellOrientation,yCellOrientation,CellOrientationField(:,:,1,i),xVelField(1:CG:end,1:CG:end),yVelField(1:CG:end,1:CG:end)); 
+    
+    % restrict calculation to region of interest:
+    if size(Binary,3) ~= 1
+        tmp = Binary(:,:,i);
+    else
+        tmp = Binary;
+    end
+    tmp = tmp(yVelField(1:CG:end,1),xVelField(1,:)');
+    CellOrientationInterp(:,:,1) = CellOrientationInterp(:,:,1).*tmp;
+    CellOrientationInterp(:,:,2) = CellOrientationInterp(:,:,2).*tmp;
     % Calculate angle of intersecting vectors:
     AngleTemp = atan2d(CellOrientationInterp(:,:,1).*VelField(1:CG:end,1:CG:end,2,i) - CellOrientationInterp(:,:,2).*VelField(1:CG:end,1:CG:end,1,i), ...
         CellOrientationInterp(:,:,1).*VelField(1:CG:end,1:CG:end,1,i) + CellOrientationInterp(:,:,2).*VelField(1:CG:end,1:CG:end,2,i));
+    % Remove points outside region of interest
+    AngleTemp(CellOrientationInterp(:,:,1) == 0) = NaN;
     Angle(:,i) = AngleTemp(:);
 end
 % Transform to 0-180 degree scale:
 Angle = abs(Angle);
 % Is this step necessary?
 Angle(Angle>90) = 180 - Angle(Angle>90);
+
+
+
+
+
+
+
 
